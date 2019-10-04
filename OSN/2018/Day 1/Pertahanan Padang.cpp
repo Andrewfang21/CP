@@ -1,60 +1,84 @@
-// Not AC yet
-
 #include<bits/stdc++.h>
+#define ll long long
 using namespace std;
 
-int A, B, Q;
+const int K = 15, N = 100;
 
-void read ()
-{
-	string subs;
-	cin >> subs;
-	
-	cin >> A >> B >> Q;
+ll odd, even, Q;
+ll pref[N];
+
+vector<pair<int, ll> > A;
+
+void impossible () {
+	puts("TIDAK MUNGKIN");
+	exit(0);
 }
 
-string rec (int ganjil, int genap, string s)
-{
-	if (ganjil > A || genap > B)
-		return "/";
-	if (ganjil == A && genap == B)
-		return s;
-				
-	string curr_s = max(rec(ganjil + genap + 1, genap, s + "1"),
-						rec(ganjil, genap + ganjil, s + "0"));
-												
-return curr_s;
-}
-
-void solve ()
-{
-	string s = rec(1, 0, "1");
-	
-	if (s[0] == '1')
-	{
-		cout << "MUNGKIN\n";
-		cout << s << "\n";
-	
-		while (Q --)
-		{
-			int l, r;
-			cin >> l >> r;
+void init () {
+	while (odd != 0 || even != 0) {
+		if (even >= odd) {
+			if (odd == 0) 
+				impossible();
 			
-			if (r > s.length() - 1)
-				cout << "DI LUAR BATAS\n";
-			else
-				cout << s.substr(l, r - l + 1) << "\n";
+			ll repeat = even / odd;
+			even -= repeat * odd;
+
+			A.push_back(make_pair(0, repeat));
+		}
+		else {
+			ll repeat = odd / (even + 1);
+			odd -= repeat * (even + 1);
+
+			A.push_back(make_pair(1, repeat));
+		}
+	} 
+}
+
+int main () {
+	string subs;
+	cin >> subs;	
+	cin >> odd >> even >> Q;
+
+	init();
+	reverse(A.begin(), A.end());
+	
+	int idx = 0;
+	for (pair<int, ll> pos : A) {
+		idx == 0 ? pref[idx] = pos.second : pref[idx] = pref[idx - 1] + pos.second;
+		idx ++;
+	}
+	
+	puts("MUNGKIN");
+	while (Q --) {
+		ll ql, qr;
+		cin >> ql >> qr;
+
+		if (qr >= pref[idx - 1]) {
+			puts("DI LUAR BATAS");
+			continue;
+		}
+
+		bool finish = false;
+		for (int i = 0; i < A.size(); i ++) {
+			if (finish)
+				break;
+
+			// Start printing on this segment
+			if (i == 0 && pref[i] > ql || i > 0 && pref[i - 1] <= ql && pref[i] > ql) {
+				while (ql < pref[i]) {
+					cout << A[i].first;
+					ql ++;
+
+					if (ql > qr) {
+						puts("");
+						finish = true;
+
+						break;
+					}
+				}
+			}
 		}
 	}
-	else
-		cout << "TIDAK MUNGKIN\n";
-}
 
-int main ()
-{
-	
-	read ();
-	solve ();
-	
 return 0;
 }
