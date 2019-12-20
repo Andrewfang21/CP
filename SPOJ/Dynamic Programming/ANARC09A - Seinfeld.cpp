@@ -1,33 +1,46 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-int main()
-{
-	string s;
-	int i,temp,ans,tc=0;
-	
-	while (cin>>s)
-	{
-		tc++;
-		if (s=="---")	return 0;
-		temp=ans=0;
-		
-		for (i=0;i<s.length();i++)
-		{
-			if (s[i]=='{')	temp++;
-			if (s[i]=='}')	temp--;
-			if (temp<0)
-			{
-				ans++;
-				temp-=2;
-			}
-			if (temp>s.length()-i)
-			{
-				ans++;
-				temp+=2;
-			}
+void solve(int tc, string str) {
+	int res, sum;
+	res = sum = 0;
+
+	for (char x : str) {
+		int pos = (x == '{' ? 1 : -1);
+
+		sum += pos;
+		if (sum < 0) {
+			sum += 2;
+			res ++;
 		}
-		printf("%d. %d\n",tc,ans);
 	}
+
+	if (sum != 0) {
+		res += (sum / 2);
+	}
+
+	cout << tc << ". " << res << "\n";
+}
+
+bool isEnd(string str) {
+	for (char x : str) {
+		if (x == '-')
+			return true;
+	}
+
+return false;
+}
+
+int main() {
+	string str;
+	int tc = 0;
+
+	while (cin >> str) {
+		if (isEnd(str))
+			break;
+
+		solve(++ tc, str);
+	}
+
 return 0;
 }
