@@ -5,99 +5,89 @@ using namespace std;
 const int N = 1e5 + 5;
 
 int n, q;
-ll cost[N], in[N], out[N];
+ll cost[N], up[N], down[N];
 
 vector<int> adj[N];
 
 void read() {
-	cin >> n >> q;
+	scanf("%d %d", &n, &q);
 	for (int i = 0; i < n; i ++)
-		cin >> cost[i];
+		scanf("%lld", &cost[i]);
 
-	for (int i = 0 ; i < n - 1; i ++) {
+	for (int i = 0; i < n - 1; i ++) {
 		int u, v;
-		cin >> u >> v;
+		scanf("%d %d", &u, &v);
 
 		adj[u].push_back(v);
 		adj[v].push_back(u);
 	}
 }
 
-void inDfs(int pos, int prev) {
-
-	in[pos] = 0;
+void down_dfs(int pos, int prev) {
+	down[pos] = 0;
 
 	for (int next : adj[pos]) {
 		if (next == prev)
 			continue;
 
-		inDfs(next, pos);
+		down_dfs(next, pos);
 
-		ll possIncome = 0;
-		if (cost[next] - cost[pos] > 0)
-			possIncome = cost[next] - cost[pos];
-
-		in[pos] = max(in[pos], in[next] + possIncome);
+		down[pos] = max(down[pos],
+						down[next] + max(0ll, cost[next] - cost[pos]));
 	}
 }
 
-void outDfs(int pos, int prev) {
-
-	pair<ll, ll> maks = make_pair(-1, -1);
+void up_dfs(int pos, int prev) {
+	ll dirProfit[2] = {-1, -1};
 
 	for (int next : adj[pos]) {
 		if (next == prev)
 			continue;
 
-		ll possIncome = 0;
-		if (cost[next] - cost[pos] > 0)
-			possIncome = cost[next] - cost[pos];
-		
-		if (in[next] + possIncome >= maks.first)
-			maks = make_pair(in[next] + possIncome, maks.first);
-		else
-		if (in[next] + possIncome > maks.second)
-			maks.second = in[next] + possIncome;
+		ll adjIncome = max(0ll, cost[next] - cost[pos]);
+
+		if (down[next] + adjIncome >= dirProfit[0]) {
+			dirProfit[1] = dirProfit[0];
+			dirProfit[0] = down[next] + adjIncome; 
+		} 
+		else if (down[next] + adjIncome > dirProfit[1])
+			dirProfit[1] = down[next] + adjIncome;
 	}
 
 	for (int next : adj[pos]) {
 		if (next == prev)
 			continue;
 
-		ll pick = maks.first, possIncome = 0;
-	
-		if (cost[next] - cost[pos] > 0)
-			possIncome = cost[next] - cost[pos];
+		ll altMove = dirProfit[0],
+		   adjIncome = max(0ll, cost[next] - cost[pos]);
+		
+		if (down[next] + adjIncome == dirProfit[0])
+			altMove = dirProfit[1];
 
-		if (in[next] + possIncome == maks.first)
-			pick = maks.second;
+		adjIncome = max(0ll, cost[pos] - cost[next]);
+		up[next] = max(up[pos] + adjIncome,
+					   altMove + adjIncome);
 
-		possIncome = 0;
-		if (cost[pos] - cost[next] > 0)
-			possIncome = cost[pos] - cost[next];
-
-		out[next] = max(possIncome + out[pos], pick + possIncome);
-		outDfs(next, pos);
+		up_dfs(next, pos);
 	}
 }
 
 void solve() {
-	inDfs(0, -1);
-	outDfs(0, -1);
+	down_dfs(0, -1);
+	up_dfs(0, -1);
 
 	while (q --) {
-		int x;
-		cin >> x;
+		int src;
+		scanf("%d" , &src);
 
-		cout << max(in[x], out[x]) << "\n";
+		printf("%lld\n", max(up[src], down[src]));
 	}
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
 
 	read();
 	solve();
 
-return 0;
+return 0;	
 }
