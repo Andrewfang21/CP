@@ -1,90 +1,79 @@
 #include<bits/stdc++.h>
-#define fi first
-#define sec second
-#define mp make_pair
-#define pb push_back
-#define ll long long
 using namespace std;
 
-ll N,K,num;
-vector<ll>vec;
-vector<pair<ll,ll> >sorted,segmen;
-map<ll,ll>pos;
+const int N = 1e5 + 5;
+const int K = 25;
 
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	
-	string subs;
-	cin>>subs;
-	
-	cin>>N>>K;
-	for (int i=0;i<N;i++)
-	{
-		cin>>num;
-		sorted.pb(mp(num,i));
-		
-		vec.pb(num);
+int n, k;
+vector<int> V;
+vector<pair<int, int>> S, segments;
+map<int, int> pos;
+
+void read() {
+	scanf("%d %d", &n, &k);
+	for (int i = 0; i < n; i ++) {
+		int x;
+		scanf("%d", &x);
+
+		V.push_back(x);
+		S.push_back(make_pair(x, i));
 	}
-	sort(sorted.begin(), sorted.end());
-	
-	for (int i=0;i<N;i++)
-		pos[sorted[i].sec]=i;
-		
-/*	for (int i=0;i<N;i++)
-		cout<<"pos["<<i<<"] = "<<pos[i]<<"\n";*/
-		
-	ll start,max_index;
-	start=max_index=-1;
-	
-	for (int i=0;i<N;i++)
-	{
-		if (start!=-1)
-			max_index=max(max_index,pos[i]);
-		
-		if (vec[i]!=sorted[i].fi)
-		{
-			if (start==-1)
-			{
-				start=i;
-				max_index=pos[i];
-			}
+}
+
+void solve() {
+	sort(S.begin(), S.end());
+	for (int i = 0; i < n; i ++) {
+		pos[S[i].second] = i;
+	}
+
+	int start = -1;
+	int finish = -1;
+
+	for (int i = 0; i < n; i ++) {
+		if (start != -1)
+			finish = max(finish, pos[i]);
+
+		if (V[i] != S[i].first && start == -1) {
+			start = i;
+			finish = pos[i];
 		}
-		
-		if (max_index==i)
-		{
-			segmen.pb(mp(start,i));
-			start=max_index=-1;
+
+		if (finish == i) {
+			segments.push_back(make_pair(start, finish));
+			start = finish = -1;
 		}
 	}
-	
-//	for (int i=0;i<segmen.size();i++)
-//		cout<<segmen[i].fi<<" "<<segmen[i].sec<<"\n";	
 
-	ll res=0;
-	if (segmen.size()<=K)
-	{
-		for (int i=0;i<segmen.size();i++)
-			res+=(segmen[i].sec-segmen[i].fi+1);
-		res+=(K-segmen.size());
-		
-		cout<<res<<"\n";
-	}
-	else
-	{
-		vector<ll> temp;
-		for (int i=1;i<segmen.size();i++)
-			temp.pb(segmen[i].fi-segmen[i-1].sec-1);
-			
-		for (int i=0;i<segmen.size();i++)
-			res+=(segmen[i].sec-segmen[i].fi+1);
-			
+	int res = 0;
+	if (segments.size() <= k) {
+		for (pair<int, int> segment : segments)
+			res += (segment.second - segment.first + 1);
+
+		res += (k - segments.size());
+	} else {
+		vector<int> temp;
+		for (int i = 1; i < segments.size(); i ++)
+			temp.push_back(segments[i].first - segments[i - 1].second - 1);
+
+		for (pair<int, int> segment : segments)
+			res += (segment.second - segment.first + 1);
+
 		sort(temp.begin(), temp.end());
-		K=segmen.size()-K;
-		
-		for (int i=0;i<K;i++)
-			res+=temp[i];
-			
-		cout<<res<<"\n";
+		k = segments.size() - k;
+
+		for (int i = 0; i < k; i ++)
+			res += temp[i];
 	}
+
+	printf("%d\n", res);
+}
+
+int main() {
+	char subs[K];
+	scanf("%s", subs);
+
+	read();
+	solve();
+
+return 0;
 }
