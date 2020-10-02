@@ -1,76 +1,78 @@
 #include<bits/stdc++.h>
 using namespace std;
-int BIT[40005],MAXX=35000;
-map<string, int>a;
 
-void reset()
-{
-	memset(BIT,0,sizeof(BIT));
-	a.clear();
-}
+const int N = 3e4 + 5;
+const int K = 25;
+const int LIMIT = 35000;
 
-void update(int bound)
-{
-	int i=bound;
-	
-	while (i>0)
-	{
-		BIT[i]++;
-		i-=(i & -i);
+int n;
+int BIT[LIMIT];
+string start_mapper[N], finish_mapper[N];
+
+map<string, int> string_mapper;
+
+void read() {
+	memset(BIT, 0, sizeof(BIT));
+	string_mapper.clear();
+
+	cin >> n;
+
+	string s;
+	for (int i = 1; i <= n; i ++) {
+		cin >> s;
+		start_mapper[i] = s;
+		string_mapper[s] = i;
+	}
+
+	for (int i = 1; i <= n; i ++) {
+		cin >> s;
+		finish_mapper[i] = s;
 	}
 }
 
-int query(int i)
-{
-	int res=0;
-	while (i<MAXX)
-	{
-		res+=BIT[i];
-		i+=(i & -i);
+void update(int idx) {
+	while (idx > 0) {
+		BIT[idx] ++;
+		idx -= (idx & -idx);
 	}
-return res;
 }
 
-int main()
-{
+int query(int idx) {
+	int res = 0;
+	while (idx < LIMIT) {
+		res += BIT[idx];
+		idx += (idx & -idx);
+	}
+
+	return res;
+}
+
+void solve() {
+	int res = 0;
+	for (int i = 1; i <= n; i ++) {
+		string s = finish_mapper[i];
+		int pos = string_mapper[s];
+
+		int cost = query(pos);
+
+		res += abs(pos + cost - i);
+		update(pos);
+	}
+
+	cout << res << "\n";
+}
+
+int main() {
 	ios_base::sync_with_stdio(false);
-	
-	int TC,N,i,temp;
-	string s,connect[30005],b[30005];
-		
-	cin>>TC;
-	
-	while (TC--)
-	{
-		reset();
-		cin>>N;
-		for (int i=1;i<=N;i++)
-		{
-			cin>>s;
-			a[s]=i;			connect[i]=s;
-		}
-		for (int i=1;i<=N;i++)
-		{
-			cin>>s;
-			b[i]=s;
-		}
-		
-		int res=0;
-		for (int i=1;i<=N;i++)
-		{
-			string now;
-			now=b[i];
-			
-			int pos=a[now];
 
-			temp=query(pos);
+	int tc;
+	cin >> tc;
 
-		//	cout<<i<<" "<<pos<<"  "<<temp<<"\n";
-			
-			res+=(abs(pos+temp-i));
-			update(pos);
-		}
-		cout<<res<<"\n";
+	string s;
+	while (tc --) {
+		read();
+		solve();
 	}
-return 0;
+
+	return 0;
 }
