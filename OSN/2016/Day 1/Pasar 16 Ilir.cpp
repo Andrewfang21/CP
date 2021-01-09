@@ -1,93 +1,98 @@
 #include<bits/stdc++.h>
 using namespace std;
-long long N,M,maze[40][40],i,j,Q,a,b;
-bool visited[40][40];
-vector<long long>vec;
 
-bool inside(int x, int y)
-{
-	if ((x>=1)&&(x<=N)&&(y>=1)&&(y<=M))
-		return true;
-return false;
+const int N = 40;
+
+int n, m;
+long long A[N][N];
+bool vis[N][N];
+
+vector<long long> V;
+int dx[] = {0, 0, 1, -1};
+int dy[] = {1, -1, 0, 0};
+
+void read() {
+	char s[N];
+	scanf("%s", s);
+
+	scanf("%d %d", &n, &m);
+	for (int i = 0; i < n; i ++)
+		for (int j = 0; j < m; j ++)
+			scanf("%lld", &A[i][j]);
 }
 
-long long binser(long long bawah, long long atas)
-{
-	long long kiri,kanan,mid,up,low;
-	up=low=-1;
-	
-	kiri=0;		kanan=vec.size()-1;
-	while (kiri<=kanan)
-	{
-		mid=(kiri+kanan)/2;
-		if (vec[mid]>=bawah)
-		{
-			low=mid;
-			kanan=mid-1;	
-		}	
-		else
-			kiri=mid+1;
-	}	
-	
-	kiri=0;		kanan=vec.size()-1;
-	while (kiri<=kanan)
-	{
-		mid=(kiri+kanan)/2;
-		if (vec[mid]>atas)
-			kanan=mid-1;
-		else
-		{
-			up=mid;
-			kiri=mid+1;
-		}
-	}
-	if ((up>=0)&&(low>=0)&&(up-low+1>0))
-		return (up-low+1);
-	else
-		return 0;
+bool inside(int x, int y) {
+	return (x >= 0 && x < n && y >= 0 && y < m);
 }
 
-void dfs(int x, int y, long long sum)
-{
-	if (inside(x,y)&&(!visited[x][y]))
-	{
-		visited[x][y]=true;
-		if ((x==N)&&(y==M))
-			vec.push_back(sum);
-		else
-		{
-			dfs(x+1,y,sum+maze[x+1][y]);
-			dfs(x-1,y,sum+maze[x-1][y]);
-			dfs(x,y+1,sum+maze[x][y+1]);
-			dfs(x,y-1,sum+maze[x][y-1]);
-		}
-		visited[x][y]=false;
+void dfs(int x, int y, long long sum) {
+	if (!inside(x, y) || vis[x][y])
+		return;
+
+	vis[x][y] = true;
+	if (x == n - 1 && y == m - 1) {
+		V.push_back(sum);
+		vis[x][y] = false;
+		return;
+	}
+
+	for (int i = 0; i < 4; i ++) {
+		pair<int,int> nxt = make_pair(x + dx[i], y + dy[i]);
+		if (!inside(nxt.first, nxt.second) || vis[nxt.first][nxt.second])
+			continue;
+
+		dfs(nxt.first, nxt.second, sum + A[nxt.first][nxt.second]);
+	}
+	vis[x][y] = false;
+}
+
+long long get(long long x, long long y) {
+	long long l = 0;
+	long long r = V.size() - 1;
+
+	long long up, low;
+	up = low = -1;
+
+	while (l <= r) {
+		long long mid = (l + r) / 2;
+		if (V[mid] >= x) {
+			low = mid;
+			r = mid - 1;
+		} else l = mid + 1;
+	}
+
+	l = 0, r = V.size() - 1;
+	while (l <= r) {
+		long long mid = (l + r) / 2;
+		if (V[mid] <= y) {
+			up = mid;
+			l = mid + 1;
+		} else r = mid - 1;
+	}
+
+	if (up >= 0 && low >= 0 && up - low + 1 > 0)
+		return up - low + 1;
+	return 0;
+}
+
+void solve() {
+	memset(vis, false, sizeof(vis));
+	dfs(0, 0, A[0][0]);
+
+	sort(V.begin(), V.end());
+	int q;
+	scanf("%d", &q);
+	while (q --) {
+		long long l, r;
+		scanf("%lld %lld", &l, &r);
+		long long res = get(l, r);
+		printf("%lld\n", res);
 	}
 }
 
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	string dummy;
-	cin>>dummy;
-	cin>>N>>M;
-	for (i=1;i<=N;i++)
-		for (j=1;j<=M;j++)
-			cin>>maze[i][j];
-	memset(visited,false,sizeof(visited));
-	dfs(1,1,maze[1][1]);
-	sort(vec.begin(),vec.end());
-	
-	/*for (i=0;i<vec.size();i++)
-		cout<<vec[i]<<"\n";
-	cout<<"\n";*/
-	
-	cin>>Q;
-	while (Q--)
-	{
-		cin>>a>>b;
-		long long x=binser(a,b);
-		cout<<x<<"\n";
-	}
-return 0;
+int main() {
+	read();
+	solve();
+
+	return 0;
 }

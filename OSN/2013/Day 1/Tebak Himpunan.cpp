@@ -1,134 +1,112 @@
 #include<bits/stdc++.h>
 using namespace std;
-bool bisa,flag[1200],included[1200],contained[1200];
-int main()
-{
-	string a,ans;
-	char b;
-	long long kiri,kanan,N,K,Q,i,j,tengah,upper;
-	vector<long long>vec;
-	cin>>a>>b;	
-	cin>>N>>K>>Q;
-	memset(flag,false,sizeof(flag));
-	memset(contained,false,sizeof(contained));
-	memset(included,false,sizeof(included));
-	if (b=='5')
-	{
-		kiri=1;	kanan=N;
-		while(kiri<=kanan)
-		{
-			tengah=(kiri+kanan)/2;
-			cout<<1<<" "<<tengah<<"\n";
-			cin>>ans;
-			
-			if (ans=="bisajadi")
-			{
-				upper=tengah;
-				kiri=tengah+1;
-			} else
-			if (ans=="tidak")
-			{
-				kanan=tengah-1;
+
+int n, k, q;
+
+void solve_linear() {
+	vector<int> v;
+	for (int i = 1; i <= n; i ++) {
+		cout << "1 " << i << endl;
+		string resp;
+		cin >> resp;
+		if (resp[0] == 'y')
+			return;
+		else if (resp[0] == 'b')
+			v.push_back(i);
+	}
+
+	cout << v.size();
+	for (int x : v)
+		cout << " " << x;
+	cout << endl;
+}
+
+void solve_binser() {
+	int l, r, up;
+	l = 1, r = n, up = -1;
+	while (l <= r) {
+		int mid = (l + r) / 2;
+		cout << "1 " << mid << endl;
+		string resp;
+		cin >> resp;
+		if (resp[0] == 'b') {
+			up = mid;
+			l = mid + 1;
+		} else r = mid - 1;
+	}
+	cout << up;
+	for (int i = 1; i <= up; i ++)
+		cout << " " << i;
+	cout << endl;
+}
+
+void solve_general() {
+	set<int> s;
+	bool cant[n + 5];
+	memset(cant, false, sizeof(cant));
+
+	for (int i = 1; i < n; i ++) {
+		bool can = true;
+		for (int j = i + 1; j <= n; j ++) {
+			if (cant[i] && cant[j])
+				continue;
+
+			cout << "2 " << i << " " << j << endl;
+			string resp;
+			cin >> resp;
+			if (resp[0] == 'b' && s.find(j) == s.end() && !cant[j]) {
+				s.insert(j);
+			} else if (resp[0] == 't') {
+				cant[i] = cant[j] = true;
+				s.erase(i);
+				s.erase(j);
+				can = false;
+			} else if (resp[0] == 'y') {
+				return;
 			}
 		}
-		cout<<upper;
-		for (i=1;i<=upper;i++)
-			cout<<" "<<i;
-		cout<<"\n";
-		fflush(stdout);
-		return 0;
+
+		if (can && s.find(i) == s.end() && !cant[i])
+			s.insert(i);
 	}
-	else
-	if ((b=='4')||(b=='3'))
-	{
-		for (i=1;i<=N;i++)
-		{
-			cout<<"1 "<<i<<"\n";
-			fflush(stdout);
-			
-			cin>>ans;
-			if (ans=="bisajadi")
-				vec.push_back(i);
-			else
-			if (ans=="ya")	return 0;
-		}
-		cout<<vec.size();
-		for (i=0;i<vec.size();i++)
-			cout<<" "<<vec[i];
-		cout<<"\n";
-		fflush(stdout);
-		return 0;
-	}
-	else
-	{
-		for (i=1;i<=N-1;i++)
-		{
-			bisa=true;
-				for (j=i+1;j<=N;j++)
-				{
-					if ((!flag[i])||(!flag[j]))		//flag menandakan bilangan yang pasti bukan merupakan subhimpunan S
-					{
-						cout<<"2 "<<i<<" "<<j<<"\n";
-						fflush(stdout);
-						cin>>ans;
-						
-						if ((ans=="bisajadi")&&(!flag[j])&&(!included[j]))
-						{
-							vec.push_back(j);
-							included[j]=true;	
-						}
-						else 
-						if (ans=="tidak")
-						{
-							flag[i]=true;	flag[j]=true;
-							bisa=false;
-						}		
-						else
-						if (ans=="ya")	return 0;
-					}
-				}
-				if ((bisa)&&(!included[i])&&(!flag[i]))	vec.push_back(i);
-		}
-		sort(vec.begin(),vec.end());
-		vector<long long>::iterator it;
-	
-		for (it=vec.begin();it!=vec.end();it++)
-		{
-			if ((contained[*it])||(flag[*it]))	
-			{	
-				contained[*it]=true;	//contained menyatakan bilangan yang terulang lebih dri 1x
-				vec.erase(it);
-				it--;
+
+	cout << s.size();
+	for (const auto &k : s)
+		cout << " " << k;
+	cout << endl;
+
+	string resp;
+	cin >> resp;
+	if (resp[0] == 'y')
+		return;
+	else if (resp[0] == 'b') {
+		for (const auto &k : s) {
+			s.erase(k);
+			cout << s.size();
+			for (const auto &kk : s) {
+				cout << " " << kk;
 			}
-			if (vec.empty()||it==vec.end()) break;
-		}
-		sort(vec.begin(),vec.end());
-		cout<<vec.size();
-		for (i=0;i<vec.size();i++)
-			cout<<" "<<vec[i];
-		cout<<"\n";
-		fflush(stdout);
-		cin>>ans;
-		
-		if (ans=="ya") return 0;
-		else
-		if (ans=="bisajadi")
-		{
-			for(i=0;i<vec.size();i++)
-			{
-				cout<<vec.size()-1;
-				for (j=0;j<vec.size();j++)
-					if (j!=i)
-						cout<<" "<<vec[j];
-				
-				cout<<"\n";
-				fflush(stdout);
-				cin>>ans;
-				
-				if (ans=="ya") 
-					return 0;
-			}
+			cout << endl;
+			string resp;
+			cin >> resp;
+			if (resp[0] == 'y')
+				return;
+
+			s.insert(k);
 		}
 	}
-return 0;
+}
+
+int main() {
+	string x, y;
+	cin >> x >> y;
+	cin >> n >> k >> q;
+
+	if (y[0] == '3' || y[0] == '4') {
+		solve_linear();
+	} else if (y[0] == '5') {
+		solve_binser();
+	} else solve_general();
+
+	return 0;
 }

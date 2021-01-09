@@ -1,65 +1,55 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-int main()
-{
-	string dummy;
-	int N,i,j,temp,a,b,c;
-	
-	getline(cin,dummy);
-	cin>>N;
-	pair<int, pair<int,int> >arr[N+5];
-	int vec[N+5];
-	vector<int>ans;
-	
-	for (i=0;i<N;i++)
-	{
-		cin>>a>>b>>c;
-		arr[i]=make_pair(a,make_pair(b,c));
-		vec[i]=a;
+int n;
+vector<tuple<int,int,int>> A;
+vector<int> V, res;
+
+void read() {
+	string str;
+	getline(cin, str);
+	cin >> n;
+	for (int i = 0; i < n; i ++) {
+		int x, y, z;
+		cin >> x >> y >> z;
+		A.emplace_back(x, y, z);
+		V.emplace_back(x);
 	}
-	sort(arr,arr+N);
-	
-	for (i=0;i<N;i++)
-	{
-		temp=i;
-		if ((i>=arr[i].second.first)&&(i<=arr[i].second.second))
+}
+
+void solve() {
+	sort(A.begin(), A.end());
+	for (int i = 0; i < A.size(); i ++) {
+		int tmp = i;
+		if (i >= get<1>(A[i]) && i <= get<2>(A[i]))
 			continue;
-		else
-		{
-			//cout<<arr[i].first<<"\n";
-			int lol=i-arr[i].second.first;
-			for (j=0;j<lol;j++)
-			{
-				//cout<<temp<<"\n";
-				swap(arr[temp],arr[temp-1]);
-				temp--;
-			}
+
+		int curr = i - get<1>(A[i]);
+		for (int j = 0; j < curr; j ++) {
+			swap(A[tmp], A[tmp - 1]);
+			tmp --;
 		}
 	}
-	/*for (i=0;i<N;i++)
-		cout<<arr[i].first<<' ';
-	cout<<"\n";*/
-	
-	for (i=0;i<N;i++)
-	{
-		for (j=0;j<N;j++)
-		{
-			if (arr[i].first==vec[j])
-			{
-				ans.push_back(j+1);
+
+	for (int i = 0; i < n; i ++) {
+		for (int j = 0; j < n; j ++) {
+			if (get<0>(A[i]) == V[j]) {
+				res.push_back(j + 1);
 				break;
 			}
 		}
 	}
-	
-	
-	for (i=0;i<ans.size();i++)
-	{
-		if (i==ans.size()-1)
-			cout<<ans[i]<<"\n";
+	for (int i = 0; i < res.size(); i ++) {
+		if (i == res.size() - 1)
+			cout << res[i] << "\n";
 		else
-			cout<<ans[i]<<" ";
+			cout << res[i] << " ";
 	}
-return 0;
+}
+
+int main() {
+	read();
+	solve();
+
+	return 0;
 }

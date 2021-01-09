@@ -1,78 +1,89 @@
 #include<bits/stdc++.h>
 using namespace std;
  
-int N,R,juri,bonus,i,j,save[15],hitung[70000],mini,maks,nilai1[25],nilai2[25];
-char gerak1[25],gerak2[25];
-bool used[25];
+const int N = 1e5 + 5;
+const int K = 30;
+
+int n, r, juri, bonus;
+int cnt[N], score[K][2];
+bool used[K];
+char movement[K][2];
  
-void proses(int a)
-{
-	int temp1,sum=0,temp2[a+5];
-	bool performed;
-	performed=false;
-	for (temp1=1;temp1<a;temp1++)
-		temp2[temp1]=nilai2[temp1];
- 
-	for (temp1=1;temp1<a;temp1++)
-	{
-		if (temp1>1)
-		{
-			if (gerak2[temp1-1]=='L') temp2[temp1]/=2;
-			if (gerak2[temp1-1]=='P') temp2[temp1]*=2;
-			if (gerak2[temp1-1]=='Y') performed=true;
-			if (performed) temp2[temp1]+=bonus;
+void process(int x) {
+	int tmp[x + 5];
+	memset(tmp, 0, sizeof(tmp));
+
+	bool has = false;
+	for (int i = 1; i < x; i ++)
+		tmp[i] = score[i][1];
+
+	int sum = 0;
+	for (int i = 1; i < x; i ++) {
+		if (i > 1) {
+			if (movement[i - 1][1] == 'L')
+				tmp[i] /= 2;
+			else if (movement[i - 1][1] == 'P')
+				tmp[i] *= 2;
+			else if (movement[i - 1][1] == 'Y')
+				has = true;
+			if (has)	tmp[i] += bonus;
 		}
-		sum+=temp2[temp1];
+
+		sum += tmp[i];
 	}
-	hitung[sum]++;
+
+	cnt[sum] ++;
 }
- 
-void Permutasi(int awal, int banyak, int batas)
-{
-	int temp2;
-	if (awal>batas) proses(awal); else
-	for (temp2=1;temp2<=banyak;temp2++)
-	{
-		if (!used[temp2])
-		{
-			used[temp2]=true;
-			gerak2[awal]=gerak1[temp2];
-			nilai2[awal]=nilai1[temp2];
- 
-			Permutasi(awal+1,banyak,batas);
- 
-			used[temp2]=false;
+
+void permute(int l, int n, int r) {
+	if (l > r)
+		process(l);
+	else {
+		for (int i = 1; i <= n; i ++) {
+			if (used[i])
+				continue;
+
+			used[i] = true;
+			movement[l][1] = movement[i][0];
+			score[l][1] = score[i][0];
+
+			permute(l + 1, n, r);
+			used[i] = false;
 		}
 	}
 }
- 
-int main()
-{
-	string dummy;
-	getline(cin,dummy);
-	cin>>N>>R>>bonus>>juri;
- 
-	j=0;	maks=0;
- 
-	for (i=1;i<=N;i++)
-		cin>>nilai1[i]>>gerak1[i];
- 
-	for (i=1;i<=25;i++)
-		used[i]=false;
- 
-	Permutasi(1,N,R);
- 
-	for (j=1;j<=juri;j++)
-	{
-		cin>>mini;
-		if (mini>21000) cout<<0<<"\n";
-		else
-		{
-			maks=0;
-			for (int k=mini+1;k<=21000;k++)
-				maks+=hitung[k];
-			cout<<maks<<"\n";	
-		}	
-	}	
-return 0;			
+
+void read() {
+	string str;
+	getline(cin, str);
+	cin >> n >> r >> bonus >> juri;
+	for (int i = 1; i <= n; i ++)
+		cin >> score[i][0] >> movement[i][0];
+}
+
+void solve() {
+	memset(used, false, sizeof(used));
+	memset(cnt, 0, sizeof(cnt));
+
+	permute(1, n, r);
+
+	while (juri --) {
+		int query;
+		cin >> query;
+		if (query > 21000)
+			puts("0");
+		else {
+			int res = 0;
+			for (int j = query + 1; j <= 21000; j ++)
+				res += cnt[j];
+			cout << res << "\n";
+		}		
+	}
+}
+
+int main() {
+	read();
+	solve();
+
+	return 0;
 }

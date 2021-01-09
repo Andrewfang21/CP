@@ -1,97 +1,93 @@
 #include<bits/stdc++.h>
 using namespace std;
-vector<pair<int,int> >daftar;
-pair<int,int>kwik,kwak;
-int cnt[2000005],arr[2000005],N;
 
-pair<pair<int,int>, pair<int,int> >check2()
-{
-	if (daftar.size()<=1)
-		return make_pair(make_pair(-1,-1),make_pair(-1,-1));
-		
-	int now=daftar[0].second;
-	for (int i=1;i<daftar.size();i++)
-		if (now<daftar[i].first)
-		{
-			return make_pair(make_pair(daftar[0].first,daftar[0].second),make_pair(daftar[i].first,daftar[i].second));
-		}
-return make_pair(make_pair(-1,-1),make_pair(-1,-1));
+const int N = 2e6 + 5;
+
+int n;
+int A[N];
+
+vector<tuple<int,int>> v;
+pair<int,int> x, y;
+
+void read() {
+	char s[20];
+	scanf("%s", s);
+	scanf("%d", &n);
+	for (int i = 1; i <= n; i ++)
+		scanf("%d", &A[i]);
 }
 
-bool check(int len)
-{
-	int same,i,kiri,kanan;
-	same=0;
-	memset(cnt,0,sizeof(cnt));
-	daftar.clear();
-	for (i=1;i<=len;i++)
-	{
-		cnt[arr[i]]++;
-		if (cnt[arr[i]]>1)
-			same++;
+tuple<int,int,int,int> get() {
+	if (v.size() <= 1)
+		return make_tuple(-1,-1,-1,-1);
+
+	int curr = get<1>(v[0]);
+	for (int i = 1; i < v.size(); i ++) {
+		if (curr < get<0>(v[i]))
+			return make_tuple(get<0>(v[0]), get<1>(v[0]), get<0>(v[i]), get<1>(v[i]));
 	}
-	kiri=1;		kanan=len;
 
-	while (kanan<=N)
-	{
-		if (same==0)
-			daftar.push_back(make_pair(kiri,kanan));
+	return make_tuple(-1,-1,-1,-1);
+}
 
-		if (cnt[arr[kiri]]>1)
-			same--;
-		cnt[arr[kiri]]--;
-		//cout<<kiri<<" "<<kanan<<" "<<same<<"\n";
-		kiri++;		kanan++;
+bool can(int len) {
+	v.clear();
+
+	int same = 0;
+	int cnt[N];
+	memset(cnt, 0, sizeof(cnt));
+	for (int i = 1; i <= len; i ++) {
+		cnt[A[i]] ++;
+		if (cnt[A[i]] > 1)
+			same ++;
+	}
+
+	int l = 1, r = len;
+	while (r <= n) {
+		if (same == 0)
+			v.emplace_back(l, r);
+
+		if (cnt[A[l]] > 1)
+			same --;
 		
-		if (kanan>N)
+		cnt[A[l]] --;
+		l ++, r ++;
+		if (r > n)
 			break;
-		cnt[arr[kanan]]++;
-		if (cnt[arr[kanan]]>1)
-			same++;
-			
+		cnt[A[r]] ++;
+		if (cnt[A[r]] > 1)
+			same ++;
 	}
-	
-	pair<pair<int,int>, pair<int,int> >temp;
-	temp=check2();
-	
-	if (temp.first.first==-1)
+
+	tuple<int,int,int,int> tmp = get();
+	int a, b, c, d;
+	tie(a,b,c,d) = tmp;
+	if (a == -1)
 		return false;
-	else
-	{
-		kwik=make_pair(temp.first.first,temp.first.second);
-		kwak=make_pair(temp.second.first,temp.second.second);
-		return true;
-	}
+
+	x = make_pair(a, b);
+	y = make_pair(c, d);
+
+	return true;
 }
 
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	int i,kiri,kanan,mid,up=-1;
-	string dummy;
-	cin>>dummy;
-	cin>>N;
-	memset(arr,0,sizeof(arr));
-	for (i=1;i<=N;i++)
-		cin>>arr[i];
-		
-	kiri=1;		kanan=N/2;
-	
-	while (kiri<=kanan)
-	{
-		mid=(kiri+kanan)/2;
-		if (check(mid))
-		{
-			//cout<<mid<<"\n";
-			//cout<<kwik.first<<" "<<kwik.second<<" "<<kwak.first<<" "<<kwak.second<<"\n";
-			
-			up=mid;
-			kiri=mid+1;
-		}
+void solve() {
+	int l = 1;
+	int r = n / 2;
+	while (l <= r) {
+		int mid = (l + r) / 2;
+		if (can(mid))
+			l = mid + 1;
 		else
-			kanan=mid-1;
+			r = mid - 1;
 	}
-	
-	cout<<kwik.first<<" "<<kwik.second<<" "<<kwak.first<<" "<<kwak.second<<"\n";
-return 0;
+
+	printf("%d %d %d %d\n", x.first, x.second, y.first, y.second);
+}
+
+int main() {
+	read();
+	solve();
+
+	return 0;
 }

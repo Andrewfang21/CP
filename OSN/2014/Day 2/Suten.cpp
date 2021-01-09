@@ -1,112 +1,86 @@
 #include<bits/stdc++.h>
-#define mp make_pair
-#define pb push_back
 using namespace std;
-vector<pair<int,int> >adj[105];
-bool visited[105];
-int INF=2*pow(10,7);
 
-int DFS(int now, int finish, int dist)
-{	
-	int lol;
-	//printf("%d %d %d    %d\n",now,dist,adj[now].size(),finish);
-	if (now==finish)
-	{
-		int tmp=dist;
-		if (tmp<0)
-		{
-			int temp1=abs(tmp);
-			int kali=ceil(double(temp1)/3.0);
-			int ans=(kali*3)-temp1;
-			//printf("%d %d     %d\n",now,ans,finish);
-			return (ans%3);	
-		}	
-		else
-			return (dist%3);
-	}
-	if (adj[now].size()==0)
-		return INF;
-	
-	if (!visited[now])
-	{	
-		visited[now]=true;
-		for (int tmp=0;tmp<adj[now].size();tmp++)
-		{
-			int next,jarak;
-			next=adj[now][tmp].first;		jarak=adj[now][tmp].second;
-			if (!visited[next])
-			{
-				lol=DFS(next,finish,dist+jarak);
-				if (lol!=INF)
-				{
-					visited[now]=false;
-					return lol;
-				}
-			}
+const int N = 105;
+
+bool vis[N];
+vector<pair<int,int>> adj[N];
+
+int dfs(int u, int v, int len) {
+	if (u == v) {
+		if (len < 0) {
+			int cycle = (abs(len) + 2) / 3;
+			return (3 * cycle - abs(len)) % 3;
 		}
-		visited[now]=false;
+		return len % 3;
 	}
-return INF;
+
+	if (adj[u].empty() || vis[u])
+		return INT_MAX;
+
+	vis[u] = true;
+	for (pair<int, int> next : adj[u]) {
+		if (vis[next.first])
+			continue;
+
+		int res = dfs(next.first, v, len + next.second);
+		if (res != INT_MAX) {
+			vis[u] = false;
+			return res;
+		}
+	}
+	vis[u] = false;
+
+	return INT_MAX;
 }
 
-int main()
-{
-	char dummy[20];
-	scanf("%s",dummy);
-	int N,i,a,b,x;
-	scanf("%d",&N);
-	
-	for (i=1;i<=(N*(N-1))/2;i++)
-	{
-		scanf("%d %d",&a,&b);
-		x=DFS(a,b,0);
-		
-		//printf("%d\n",x);
-		if (x==0)
-		{
+int main() {
+	char str[25];
+	scanf("%s", str);
+
+	int n;
+	scanf("%d", &n);
+
+	memset(vis, false, sizeof(vis));
+	for (int i = 1; i <= n * (n - 1) / 2; i ++) {
+		int u, v;
+		scanf("%d %d", &u, &v);
+
+		int res = dfs(u, v, 0);
+		if (res == 0) {
 			printf("SERI\n");
 			fflush(stdout);
 		}
-		else
-		if (x==1)
-		{
-			printf("%d MENANG\n",a);
+		else  if (res == 1) {
+			printf("%d MENANG\n", u);
 			fflush(stdout);
 		}
-		else
-		if (x==2)
-		{
-			printf("%d MENANG\n",b);
+		else if (res == 2) {
+			printf("%d MENANG\n", v);
 			fflush(stdout);
 		}
-		else
-		if (x==INF)	//gak ketemu relasi
-		{
+		else {
 			printf("PASS\n");
 			fflush(stdout);
 			
-			scanf("%s",dummy);
-			string ans=dummy;
-			
-			if (ans=="SERI")
-			{
-				adj[a].pb(mp(b,0));		adj[b].pb(mp(a,0));
-			}
-			else
-			{
-				scanf("%s",dummy);
-				int tmp=stoi(ans);
-				
-				if (tmp==a)
-				{
-					adj[a].pb(mp(b,1));		adj[b].pb(mp(a,-1));
-				}
-				else
-				{
-					adj[a].pb(mp(b,-1));	adj[b].pb(mp(a,1));
+			scanf("%s", str);
+			if (str[0] == 'S') {
+				adj[u].emplace_back(v, 0);
+				adj[v].emplace_back(u, 0);
+			} else {
+				int winner = stoi(str);
+				scanf("%s", str);
+
+				if (winner == u) {
+					adj[u].emplace_back(v, 1);
+					adj[v].emplace_back(u, -1);
+				} else {
+					adj[u].emplace_back(v, -1);
+					adj[v].emplace_back(u, 1);
 				}
 			}
 		}
 	}
-return 0;
+
+	return 0;
 }

@@ -1,45 +1,55 @@
 #include<bits/stdc++.h>
 using namespace std;
-int arr[2005],N,i,j,step,temp;
-bool filled[5500];
- 
-int main()
-{
+
+const int N = 6000;
+
+int n;
+int A[N];
+bool exists[N];
+
+void read() {
 	ios_base::sync_with_stdio(false);
-	string subs;
-	cin>>subs;
-	cin>>N;
-	if ((N==1)||(N==2))
-	{
-		cout<<"0\n";
-		return 0;
+
+	string str;
+	cin >> str;
+	cin >> n;
+	for (int i = 0; i < n; i ++) {
+		cin >> A[i];
+		A[i] += 2500;
+		exists[A[i]] = true;
 	}
-	memset(filled,false,sizeof(filled));
-	for (i=1;i<=N;i++)
-	{
-		cin>>arr[i];
-		arr[i]+=2500;
-		filled[arr[i]]=true;	//ada bebek
+}
+
+void solve() {
+	if (n <= 2) {
+		puts("0");
+		return;
 	}
-	 
-	int ans=N-2;
-	for (i=1;i<=N;i++)
-	{
-		for (step=1;step<5000;step++)
-		{
-			int remaining=N,cnt=0;
-			for (j=arr[i];j<=5000;j+=step)
-			{
-				if (filled[j])
-					remaining--;
+
+	int res = n - 2;
+	int tmp = 0;
+	for (int i = 0; i < n; i ++) {
+		for (int step = 1; step < 5000; step ++) {
+			int rem = n;
+			int curr = 0;
+			for (int j = A[i]; j <= 5000; j += step) {
+				if (exists[j])
+					rem --;
 				else
-					cnt++;
-				temp=remaining+cnt;
-				ans=min(ans,temp);
+					curr ++;
+
+				tmp = rem + curr;
+				res = min(res, tmp);
 			}
 		}
-		//cout<<arr[i]<<" "<<step<<" "<<temp<<"\n";
 	}
-	cout<<ans<<"\n";
-return 0;
+
+	cout << res << "\n";
+}
+
+int main() {
+	read();
+	solve();
+
+	return 0;
 }

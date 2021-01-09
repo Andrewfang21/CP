@@ -1,79 +1,71 @@
 #include<bits/stdc++.h>
 using namespace std;
-int daftar[1005],i,j,N,M;
-int lol[1005];
-bool found,visited[2005][1005];
 
-bool inside(int num)
-{
-	if ((num>=1)&&(num<=N))
-		return true;
-return false;
+const int N = 1005;
+
+int n, m;
+int A[N], V[N];
+bool vis[2 * N][N], found = false;
+
+bool inside(int pos) {
+	return (pos >= 1 && pos <= n);
 }
 
-void DFS(int kandang, int time)
-{
-	if ((!visited[kandang][time])&&(lol[time]!=kandang)&&(inside(kandang))&&(!found))
-	{
-		visited[kandang][time]=true;
-		daftar[time]=kandang;
+void dfs(int pos, int time, int mode) {
+	if (!inside(pos) || found)
+		return;
+
+	if (mode == 0 && pos != A[time]) {
+		V[time] = pos;
+		if (time == m) {
+			found = true;
+			for (int i = 1; i <= time; i ++)
+				printf("%d\n", V[i]);
 		
-		if ((time==M)&&(lol[time]!=kandang))
-		{
-			found=true;
-			for (int i=1;i<=M;i++)
-				cout<<daftar[i]<<"\n";
+			return;
 		}
-			
-		DFS(kandang+1,time+1);
-		DFS(kandang-1,time+1);
+
+		dfs(pos + 1, time + 1, 0);
+		dfs(pos - 1, time + 1, 0);
+
+	} else if (mode == 1 && !vis[pos][time] && A[time] != pos) {
+		vis[pos][time] = true;
+		V[time] = pos;
+
+		if (time == m && A[time] != pos) {
+			found = true;
+			for (int i = 1; i <= m; i ++)
+				printf("%d\n", V[i]);
+		}
+
+		dfs(pos + 1, time + 1, 1);
+		dfs(pos - 1, time + 1, 1);
 	}
 }
 
-void dfs (int posisi, int waktu)
-{
-	if ((posisi!=lol[waktu])&&(posisi>=1)&&(posisi<=N)&&(!found))
-	{
-		daftar[waktu]=posisi;
-		if (waktu==M)
-		{
-			for (int temp=1;temp<=waktu;temp++)
-				cout<<daftar[temp]<<"\n";
-			found=true;
+int main() {
+	scanf("%d %d", &n, &m);
+	for (int i = 1; i <= m; i ++)
+		scanf("%d", &A[i]);
+
+	if (n > 2000) {
+		for (int i = n / 2; i <= n; i ++) {
+			if (found)
+				break;
+
+			dfs(i, 0, 0);
 		}
-		else
-		{
-		dfs(posisi+1,waktu+1);
-		dfs(posisi-1,waktu+1);
-		}
-	}
-}
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	cin>>N>>M;
-	for (i=1;i<=M;i++)
-		cin>>lol[i];
-	
-	found=false;
-	if (N>2000)
-	{
-		for (i=(N/2);i<=N;i++)
-			if (!found)
-			{
-				dfs(i,0);
-				if (found) break;
-			}
-	}
-	else
-	{
-		memset(visited,false,sizeof(visited));
-		for (i=1;i<=N;i++)
-		{
-			if ((!visited[i][1])&&(lol[1]!=i))
-				DFS(i,1);
+	} else {
+		for (int i = 1; i <= n; i ++) {
+			if (vis[i][1] || A[1] == i)
+				continue;
+
+			dfs(i, 1, 1);
 		}
 	}
-	if (!found) cout<<"menyerah\n";
-return 0;
+
+	if (!found)
+		puts("menyerah");
+
+	return 0;
 }

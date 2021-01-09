@@ -1,77 +1,70 @@
 #include<bits/stdc++.h>
-#define ull unsigned long long
-#define mod 1000000007
 using namespace std;
-ull N,M,K,ans,temp[5],C[1005][1005];
-bool used[5];
 
-ull pangkat(ull base, ull power)
-{
-	ull res;
-	if (power==0)
+const int N = 1e3 + 5;
+const int K = 1e6 + 5;
+const long long MOD = 1e9 + 7;
+
+long long n, m, k;
+long long C[N][N];
+char s[K], shop[K];
+
+void read() {
+	scanf("%s", s);
+	scanf("%lld %lld %lld", &n, &m, &k);
+	scanf("%s", shop);
+}
+
+long long power(long long b, long long p) {
+	if (p == 0)
 		return 1;
-	if (power==1)
-		return base%mod;
-		
-	if (power%2==0)
-	{
-		res=pangkat(base,power/2);
-		return ((res%mod)*(res%mod))%mod;
-	}
-	else
-	{
-		res=pangkat(base,power/2);
-		return (((base%mod)*(res%mod))%mod*(res%mod)%mod);
-	}
+	else if (p == 1)
+		return b % MOD;
+
+	long long tmp = power(b, p / 2);
+	if (p % 2)
+		return (b % MOD * (tmp % MOD * tmp % MOD) % MOD) % MOD;
+
+	return (tmp % MOD * tmp % MOD) % MOD;
 }
 
-void Kombinasi()
-{
-	ull i,j;
-	for (i=0;i<=M;i++)
-		for (j=0;j<=i;j++)
-		{
-			if ((j==0)||(j==i))
-				C[i][j]=1;
-			else
-				C[i][j]=((C[i-1][j-1]%mod)+(C[i-1][j]%mod))%mod;
+void precompute() {
+	for (int i = 0; i <= m; i ++) {
+		for (int j = 0; j <= i; j ++) {
+			if (j == 0 || i == 0)
+				C[i][j] = 1;
+			else 
+				C[i][j] = (C[i-1][j-1] % MOD + C[i-1][j] % MOD) % MOD;
 		}
+	}
 }
 
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	string dummy,shop;
-	cin>>dummy;
-	cin>>N>>M>>K;
-	cin>>shop;
-	memset(used,false,sizeof(used));
-	
-	if ((dummy[8]!='8')&&(dummy[9]!='9'))
-	{
-		Kombinasi();
-		//print();
-		ans=(pangkat(pangkat(2,M),(N-1))%mod*((C[M][K])%mod))%mod;
-		/*cout<<pangkat(pangkat(2,M),N-1)<<" ";
-		cout<<C[M][K]<<"\n";*/
-		cout<<ans<<"\n";
+void solve() {
+	if (s[8] == '8' || s[9] == '9') {
+		long long res = power(power(2, m), n - 1) % MOD;
+		long long x, y;
+		x = y = 1;
+		for (int i = m; i > m - k; i --)
+			x = (x % MOD * i % MOD) % MOD;
+
+		for (int i = 1; i <= k; i ++)
+			y = (y % MOD) * (i % MOD) % MOD;
+
+		long long tmp = (x % MOD * power(y, MOD - 2) % MOD) % MOD;
+		res = (res % MOD * (tmp % MOD)) % MOD;
+		printf("%lld\n", res);
+
+		return;
 	}
-	else 	 
-	{
-		ans=pangkat(pangkat(2,M),(N-1))%mod;
-		ull temp2=1,a,b,i;
-		
-		a=1;
-		for (i=M;i>(M-K);i--)
-			a=((a%mod)*(i%mod))%mod;
-		b=1;
-		for (i=1;i<=K;i++)
-			b=((b%mod)*(i%mod))%mod;
-			
-		temp2=((a%mod)*(pangkat(b,1000000005)%mod))%mod;
-		ans=((ans%mod)*(temp2%mod))%mod;
-		
-		cout<<ans<<'\n';	
-	}
-return 0;
+
+	precompute();
+	long long res = (power(power(2, m), n - 1) % MOD * C[m][k] % MOD) % MOD;
+	printf("%lld\n", res);	
+}
+
+int main() {
+	read();
+	solve();
+
+	return 0;	
 }

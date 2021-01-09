@@ -1,59 +1,57 @@
 #include<bits/stdc++.h>
 using namespace std;
-long long cnt[2000005],pref[2000005],pref2[2000005];
 
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	long long N,i,j,ans,temp1,sum,temp2;
-	string dummy;
-	cin>>dummy;
-	cin>>N;
-	long long arr[N+5];
-	
-	memset(pref,0,sizeof(pref));	memset(pref2,0,sizeof(pref2));
-	memset(cnt,0,sizeof(cnt));
-	
-	for (i=0;i<N;i++)
-	{
-		cin>>arr[i];
-		cnt[arr[i]]++;
-		
-		if (arr[i]==0)
-			pref[0]++;	
+const int N = 2e6 + 5;
+
+int n; 
+long long A[N], cnt[N], pref[N][2];
+
+void read() {
+	char s[20];
+	scanf("%s", s);
+	scanf("%d", &n);
+	for (int i = 0; i < n; i ++) {
+		scanf("%lld", &A[i]);
+		cnt[A[i]] ++;
+		if (A[i] == 0)
+			pref[0][0] ++;
 	}
-	
-	sort(arr,arr+N);
-	for (i=1;i<=2000000;i++)
-	{
-		pref[i]=pref[i-1]+cnt[i];
-		pref2[i]=pref2[i-1]+i*cnt[i];
+}
+
+void solve() {
+	sort(A, A + n);
+	for (int i = 1; i < 2000000; i ++) {
+		pref[i][0] = pref[i - 1][0] + cnt[i];
+		pref[i][1] = pref[i - 1][1] + i * cnt[i];
 	}
-	
-	if (arr[N-1]==0)
-	{
-		cout<<N<<"\n";
-		return 0;
+
+	if (A[n - 1] == 0) {
+		printf("%d\n", n);
+		return;
 	}
-	
-	ans=LLONG_MAX;
-	for (i=1;i<=arr[N-1];i+=2)
-	{
-		sum=0;			temp2=0;
-		for (j=i;j<=2000000;j*=2)
-		{
-			if ((temp2==0)&&(pref[0]!=0))
-			{
-				sum=sum+j*pref[j]-pref2[j];
-			}
+
+	long long res = LLONG_MAX;
+	for (int i = 1; i <= A[n - 1]; i += 2) {
+		long long sum, tmp;
+		sum = tmp = 0;
+
+		for (int j = i; j < 2000000; j *= 2) {
+			if (tmp == 0 && pref[0][0] != 0)
+				sum += j * pref[j][0] - pref[j][1];
 			else
-				sum=sum+j*(pref[j]-pref[temp2])-(pref2[j]-pref2[temp2]);
-			//cout<<j<<" "<<sum<<"\n";
-			temp2=j;
+				sum += j * (pref[j][0] - pref[tmp][0]) - (pref[j][1] - pref[tmp][1]);
+
+			tmp = j;
 		}
-		//cout<<i<<" "<<sum<<"\n";
-		ans=min(ans,sum);
+		res = min(res, sum);
 	}
-	cout<<ans<<"\n";
-return 0;
+
+	printf("%lld\n", res);
+}
+
+int main() {
+	read();
+	solve();
+
+	return 0;
 }

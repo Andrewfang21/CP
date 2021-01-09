@@ -1,79 +1,72 @@
 #include<bits/stdc++.h>
-#define pb push_back
 using namespace std;
 
-int MAXX, dp[2][205][1805], N, permen[205];
-long long K;
-vector< int > orang;
+const int N = 205;
+const int K = 2000;
 
-void read()
-{
+int n;
+int dp[2][N][K], candy[N];
+long long k;
+vector<int> person;
+
+void read() {
 	string subs;
-	cin>>subs;
+	cin >> subs;
+	cin >> n >> k;
 	
-	cin>>N>>K;
-	
-	char a;
-	for (int i = 1; i <= N; i++)
-	{
-		cin>>a;
-		permen[i] = a-'0';
+	for (int i = 1; i <= n; i ++) {
+		char c;
+		cin >> c;
+		candy[i] = c - '0';
 	}
 	
-	for (int i = 1; i <= N; i++)
-	{
-		cin>>a;
-		if (a == '1')
-			orang.pb(i);
+	for (int i = 1; i <= n; i ++) {
+		char c;
+		cin >> c;
+		if (c == '1')
+			person.push_back(i);
 	}
-	MAXX = 9*N;
 }
 
-int dist (int a, int b)
-{
-	return abs(a - b);
-}
+void solve() {
+	const int MAKS = 9 * n;
+	memset(dp, -1, sizeof(dp));
+	
+	for (int candy_pos = 0; candy_pos <= n; candy_pos ++)
+		dp[0][candy_pos][0] = dp[1][candy_pos][0] = 0;
 
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	
-	read();
-	
-	memset(dp,-1,sizeof(dp));
-	for (int pos_permen = 0; pos_permen <= N; pos_permen++)
-	{
-		dp[0][pos_permen][0] = 0;
-		dp[1][pos_permen][0] = 0;
-	}
-	
-	for (int pos_orang = 0; pos_orang < orang.size(); pos_orang++)
-		for (int pos_permen = 1; pos_permen <= N; pos_permen++)
-			for (int profit = 0; profit <= MAXX; profit++)
-			{					
-				dp[pos_orang & 1][pos_permen][profit] = dp[pos_orang & 1][pos_permen - 1][profit];
-	
-				if (profit - permen[pos_permen] >= 0)
-				{
-					if (dp[(pos_orang +1) & 1][pos_permen - 1][profit - permen[pos_permen]] != -1)
-					{
-						if (dp[pos_orang & 1][pos_permen][profit] != -1)		//udah pernah diisi
-							dp[pos_orang & 1][pos_permen][profit] = min(dp[(pos_orang + 1) & 1][pos_permen - 1][profit - permen[pos_permen]] + dist(pos_permen, orang[pos_orang]),
-																		dp[pos_orang & 1][pos_permen][profit]);
+	for (int person_pos = 0; person_pos < person.size(); person_pos ++) {
+		for (int candy_pos = 1; candy_pos <= n; candy_pos ++) {
+			for (int profit = 0; profit <= MAKS; profit ++) {
+				dp[person_pos & 1][candy_pos][profit] = dp[person_pos & 1][candy_pos - 1][profit];
+				if (profit - candy[candy_pos] >= 0) {
+					if (dp[(person_pos + 1) & 1][candy_pos - 1][profit - candy[candy_pos]] != -1) {
+						if (dp[person_pos & 1][candy_pos][profit] != -1)
+							dp[person_pos & 1][candy_pos][profit] = min(
+								dp[(person_pos + 1) & 1][candy_pos - 1][profit - candy[candy_pos]] + abs(candy_pos - person[person_pos]),
+								dp[person_pos & 1][candy_pos][profit]
+							);
 						else
-							dp[pos_orang & 1][pos_permen][profit] = dp[(pos_orang + 1) & 1][pos_permen - 1][profit - permen[pos_permen]] + dist(pos_permen, orang[pos_orang]);
+							dp[person_pos & 1][candy_pos][profit] = dp[(person_pos + 1) & 1][candy_pos - 1][profit - candy[candy_pos]] + abs(candy_pos - person[person_pos]);
 					}
 				}
 			}
-	
-	int res = 0;
-	for (int profit = 0; profit <= MAXX; profit++)
-		if (dp[(orang.size() + 1) & 1][N][profit] <= K && dp[(orang.size() + 1) & 1][N][profit] != -1)
-		{
-//			cout<<profit<<"  "<<dp[(orang.size() + 1) & 1][N][profit]<<"\n";
-			res = profit;
 		}
-	
-	cout<<res<<"\n";
-return 0;		
+	}
+
+	int res = 0;
+	for (int profit = 0; profit <= MAKS; profit ++) {
+		if (dp[(person.size() + 1) & 1][n][profit] <= k && dp[(person.size() + 1) & 1][n][profit] != -1)
+			res = profit;
+	}
+
+	printf("%d\n", res);
+}
+
+int main() {
+	ios_base::sync_with_stdio(false);
+	read();
+	solve();
+
+	return 0;
 }

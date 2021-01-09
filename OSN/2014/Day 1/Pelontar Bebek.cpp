@@ -1,129 +1,82 @@
 #include<bits/stdc++.h>
-#define pb push_back
 using namespace std;
 
-int N;
-int dp[5][1805];
-string subs;
-priority_queue<int, vector<int>, greater<int> > q[1805];
+const int N = 2000;
 
-struct lol
-{
-	int sudut, kecepatan;
-};
+int n;
+int dp[2][N];
 
-vector<lol> v, temp;
+vector<tuple<int,int>> v;
+priority_queue<int,vector<int>,greater<int>> q[N];
 
-bool cmp (lol lhs, lol rhs)
-{
-	if (lhs.sudut == rhs.sudut)
-		return lhs.kecepatan > rhs.kecepatan;
+void read() {
+	string str;
+	cin >> str;
+	cin >> n;
 
-return lhs.sudut < rhs.sudut;
-}
+	for (int i = 1; i <= n; i ++) {
+		int x, y;
+		cin >> x >> y;
 
-double toRadian(double a)
-{
-return (a * acos(-1)) / 180;
-}
-
-void debug ()
-{
-	for (int i=1;i<v.size();i++)
-		for (int j=1;j<=1800;j++)
-			if (dp[i][j] != -1)
-				cout<<i<<" "<<j<<"   "<<dp[i][j]<<"\n";
-}
-
-void read ()
-{
-	cin >> subs;	
-	cin >> N;
-	
-	for (int i=1;i<=N;i++)
-	{
-		int a, b;
-		
-		cin >> a >> b;		//kecepatan, sudut
-		q[b].push(a);
-		
-		int max_freq = (1800 - 1) / b + 1;
-		
-		if (q[b].size() > max_freq)
-			q[b].pop();
+		q[y].push(x);
+		if (q[y].size() > 1800 / y)
+			q[y].pop();
 	}
-	
-	for (int i=1;i<=1800;i++)
-	{
-		if (!q[i].empty())
-		{
-			while (!q[i].empty())
-			{
-				int u = q[i].top();
-				v.pb({i, u});
-				q[i].pop();
-			}
+
+	for (int i = 1; i <= 1800; i ++) {
+		while (!q[i].empty()) {
+			v.emplace_back(q[i].top(), i);
+			q[i].pop();
 		}
 	}
-	v.pb({-1, -1});
-	
-	sort(v.begin(), v.end(), cmp);
+	v.emplace_back(-1, -1);
 }
 
-void solve ()
-{	
+double toRadian(double x) {
+	return x * acos(-1) / 180.0;
+}
+
+void solve() {
+	sort(v.begin(), v.end(), [&](tuple<int,int> &l, tuple<int,int> &r) {
+		if (get<0>(l) == get<0>(r))
+			return get<1>(l) > get<1>(r);
+		return get<0>(l) < get<0>(r);
+	});
+
 	memset(dp, -1, sizeof(dp));
-	
-//	debug ();
-	
 	dp[0][0] = dp[1][0] = 0;
-		
-	for (int pos=1;pos<v.size();pos++)
-		for (int deg=1;deg<=1800;deg++)
-		{
-			dp[pos & 1][deg] = dp[(pos + 1) & 1][deg];
-			
-			if (deg - v[pos].sudut >= 0)
-			{
-				if (dp[(pos + 1 ) & 1][deg - v[pos].sudut] != -1)
-					dp[pos & 1][deg] = max(dp[pos & 1][deg],
-								       max(dp[(pos + 1) & 1][deg - v[pos].sudut], v[pos].kecepatan));
+
+	for (int i = 1; i < v.size(); i ++) {
+		for (int j = 1; j <= 1800; j ++) {
+			dp[i & 1][j] = dp[(i + 1) & 1][j];
+
+			int l, r;
+			tie(l, r) = v[i];
+			int rem = j - r;
+
+			if (rem >= 0 && dp[(i + 1) & 1][rem] != -1) {
+				dp[i & 1][j] = max(dp[i & 1][j], max(
+					dp[(i + 1) & 1][rem], l));
 			}
 		}
-//	debug();	
-}
+	}
 
-void print ()
-{
-	int curr_speed;
-	double curr_ans, res;
-	
-	res = -1;
-	
-	for (int i=1;i<=1800;i++)
-	{
-		curr_speed = dp[(v.size() + 1) & 1 ][i];
-		
-		if (curr_speed == -1)
+	double res = .0;
+	for (int i = 1; i <= 1800; i ++) {
+		int speed = dp[(v.size() + 1) & 1][i];
+		if (speed == -1)
 			continue;
-		
-		curr_ans = 	abs(2 * curr_speed * curr_speed * sin(toRadian(i/10.0)) * cos(toRadian(i/10.0)) * 9.80);
-		
-//		cout << i << "   " << curr_speed << "    " << curr_ans << "\n";
-		
-		if (curr_ans > res)
-			res = curr_ans;
-	}	
-	cout << setprecision(8) << fixed << res << "\n";	
+
+		double curr = abs(2 * speed * speed * sin(toRadian(i / 10.0)) * cos(toRadian(i / 10.0)) * 9.80);
+		res = max(res, curr);
+	}
+
+	cout << setprecision(8) << fixed << res << "\n";
 }
 
-int main ()
-{
-	ios_base::sync_with_stdio(false);
-	
+int main() {
 	read();
 	solve();
-	print();
-	
-return 0;
+
+	return 0;
 }

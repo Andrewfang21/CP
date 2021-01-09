@@ -1,193 +1,144 @@
 #include<bits/stdc++.h>
-#define ll long long
-#define pb push_back
 using namespace std;
 
-ll N, M, count_zero, MOD = 1e9 + 7;
+const int N = 25;
+const int MOD = 1e9 + 7;
 
-ll arr[25][25];
+int n, m, zero_cnt;
+long long A[N][N];
+vector<tuple<int,int,int>> v;
 
-struct lol
-{
-	ll a, b;
-	ll c;
-};
-
-vector<lol> v;
-
-void debug ()
-{
-	for (ll i=1;i<=N;i++)
-	{
-		for (ll j=1;j<=M;j++)
-			cout << arr[i][j] << " ";
-		cout << "\n";
-	}
-	cout << "\n";
-}
-
-void read ()
-{
+void read () {
 	string sub;
 	getline(cin, sub);
 	
-	cin>>N>>M;
-	
-	count_zero = 0;
-	for (ll i=1;i<=N;i++)
-		for (ll j=1;j<=M;j++)
-		{
-			cin >> arr[i][j];
-			
-			if (arr[i][j] == 0)		count_zero++;
+	cin >> n >> m;
+	for (int i = 1; i <= n; i ++)
+		for (int j = 1; j <= m; j ++) {
+			cin >> A[i][j];
+			if (A[i][j] == 0)
+				zero_cnt ++;
 		}
-//	cout << "\n";
 }
 
-ll pangkat (ll base, ll pow)
-{
-	if (pow == 0)		return 1;
-	if (pow == 1)		return base;
-	
-	ll curr = pangkat(base, pow / 2) % MOD;
-	
-	if (pow % 2 == 0)
-		return (curr % MOD * curr % MOD) % MOD;
-	else
-		return ((base % MOD * curr % MOD) % MOD * curr % MOD) % MOD;
-}
-
-ll cek (ll num, ll piv)
-{
-	ll kiri, kanan, mid, up, curr_num;
-	
-	kiri = 0;				kanan = 30;
-	
-	up = 0;
-	while (kiri <= kanan)
-	{
-		mid = (kiri + kanan) / 2;
-		
-		curr_num = num * pangkat(2,mid);
-		
-		if (curr_num < piv)
-		{
-			up = mid;
-			kiri = mid + 1;
-		}
-		else
-		if (curr_num > piv)
-			kanan = mid - 1;
-		else
-			return mid;
+long long power(long long b, long long p) {
+	if (p == 0) {
+		return 1;
+	} else if (p == 1) {
+		return b;
 	}
-return up;
+
+	long long tmp = power(b, p / 2) % MOD;
+	if (p % 2 == 0)
+		return (tmp % MOD * tmp % MOD) % MOD;
+
+	return ((b % MOD * tmp % MOD) % MOD * tmp % MOD) % MOD;
 }
 
-bool all_same (ll curr_pos)
-{
-	for (ll i=2;i<=N;i++)
-		if (arr[i][curr_pos] != arr[i-1][curr_pos])
+long long get(long long num, long long piv) {
+	int l = 0;
+	int r = 30;
+
+	int up = 0;
+	while (l <= r) {
+		int mid = (l + r) / 2;
+		long long curr = num * power(2, mid);
+		if (curr < piv) {
+			up = mid;
+			l = mid + 1;
+		} else if (curr > piv) {
+			r = mid - 1;
+		} else return mid;
+	}
+
+	return up;
+}
+
+bool all_same (int pos) {
+	for (int i = 2; i <= n; i ++) {
+		if (A[i][pos] != A[i - 1][pos])
 			return false;
-return true;
+	}
+
+	return true;
 }
 
-void multiply (ll curr_pos, ll K)
-{
-	for (ll i=1;i<=M;i++)
-		arr[curr_pos][i] = (arr[curr_pos][i] % MOD * pangkat(2,K) % MOD) % MOD;
+void multiply(int pos, int k) {
+	for (int i = 1; i <= m; i ++)
+		A[pos][i] = (A[pos][i] % MOD * power(2, k) % MOD) % MOD;
 }
 
-ll search ()
-{
-	ll cnt = 0;
-	
-	for (ll i=1;i<=N;i++)
-		for (ll j=1;j<=M;j++)
-			if (arr[i][j] == 0)		cnt++;
-return cnt;
+int search() {
+	int res = 0;
+	for (int i = 1; i <= n; i ++) {
+		for (int j = 1; j <= m; j ++)
+			if (A[i][j] == 0)
+				res ++;
+	}
+	return res;
 }
 
-void solve ()
-{
-	ll total, curr_pos;
-	
-	curr_pos = 1;				total = N * M;
-	
-	while (count_zero < total)
-	{
-		ll cnt = 0;
-		for (ll i=1;i<=N;i++)
-			if (arr[i][curr_pos] == 0)		cnt++;
-		
-		if (cnt == N)
-		{
-			curr_pos++;
-			continue;	
+void solve() {
+	int tot = n * m;
+	int pos = 1;
+	while (zero_cnt < tot) {
+		int res = 0;
+		for (int i = 1; i <= n; i ++) {
+			if (A[i][pos] == 0)
+				res ++;
 		}
-		
-		if (cnt < N && cnt != 0)
-		{
-			v.pb({1, curr_pos, 1});
-			
-			for (ll i=1;i<=N;i++)
-				arr[i][curr_pos] += 1;
+		if (res == n) {
+			pos ++;
+			continue;
 		}
-		
-		ll maks = -1;
-		for (ll i=1;i<=N;i++)
-			if (arr[i][curr_pos] > maks)
-				maks = arr[i][curr_pos];
-		
-		for (ll i=1;i<=N;i++)
-		{
-			if (arr[i][curr_pos] < maks)
-			{
-				ll K = cek(arr[i][curr_pos], maks);
-				
-				if (K == 0)			continue;
-				v.pb({3, i, K});
-				
-				multiply(i,K);
-				
+		if (res < n && res != 0) {
+			v.emplace_back(1, pos, 1);
+			for (int i = 1; i <= n; i ++)
+				A[i][pos] ++;
+		}
+
+		long long maks = -1;
+		for (int i = 1; i <= n; i ++)
+			maks = max(A[i][pos], maks);
+
+		for (int i = 1; i <= n; i ++) {
+			if (A[i][pos] < maks) {
+				long long k = get(A[i][pos], maks);
+				if (k == 0)
+					continue;
+
+				v.emplace_back(3, i, k);
+				multiply(i, k);
 			}
 		}
-//		debug() ;
-		
-		if (all_same(curr_pos))
-		{
-			v.pb({2, curr_pos, arr[1][curr_pos]});
-			for (ll i=1;i<=N;i++)
-				arr[i][curr_pos] = 0;
-			
-			curr_pos ++;
-		}
-		else
-		{
-			ll mins = INT_MAX;
-			for (ll i=1;i<=N;i++)
-				if (arr[i][curr_pos] < mins)
-					mins = arr[i][curr_pos];
-			
+
+		if (all_same(pos)) {
+			v.emplace_back(2, pos, A[1][pos]);
+			for (int i = 1; i <= n; i ++) {
+				A[i][pos] = 0;
+			}
+			pos ++;
+		} else {
+			long long mins = INT_MAX;
+			for (int i = 1; i <= n; i ++)
+				mins = min(mins, A[i][pos]);
+
 			mins --;
-			v.pb({2, curr_pos, mins});
-			
-			for (ll i=1;i<=N;i++)
-				arr[i][curr_pos] -= mins;
+			v.emplace_back(2, pos, mins);
+
+			for (int i = 1; i <= n; i ++)
+				A[i][pos] -= mins;
 		}
-		
-		count_zero = search();
-//		debug();
-//		break;
-	}	
+
+		zero_cnt = search();
+	}
 }
 
-void print ()
-{
+void print() {
 	cout << v.size() << "\n";
-	
-	for (ll i=0;i<v.size();i++)
-		cout << v[i].a << " " << v[i].b << " " << v[i].c << "\n";
+	for (tuple<int,int,int> t : v) {
+		cout << get<0>(t) << " " << get<1>(t) << " " << get<2>(t) << "\n";
+	}
 }
 
 int main ()
